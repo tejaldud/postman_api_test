@@ -1,0 +1,14 @@
+{
+  "name": "postman-api-tests",
+  "version": "1.0.0",
+  "description": "API tests using Postman and Newman for CI/CD integration",
+  "scripts": {
+    "test": "newman run ./API_Test_Collection.json -e ./API_Test_Environment.json -r cli,htmlextra --reporter-htmlextra-export newman-results/report.html",
+    "test:dev": "newman run ./API_Test_Collection.json -e ./Technical_Interview_Environment.json -r cli,htmlextra --reporter-htmlextra-export newman-results/report.html --env-var \"mock_server_url=https://dev-mock-server.mock.pstmn.io\"",
+    "test:staging": "newman run ./API_Test_Collection.json -e ./Technical_Interview_Environment.json -r cli,htmlextra --reporter-htmlextra-export newman-results/report.html --env-var \"mock_server_url=https://staging-mock-server.mock.pstmn.io\""
+  },
+  "devDependencies": {
+    "newman": "^5.3.2",
+    "newman-reporter-htmlextra": "^1.22.11"
+  }
+}

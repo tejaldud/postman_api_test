@@ -1,0 +1,586 @@
+{
+  "info": {
+    "_postman_id": "a7b15e1c-3b42-48e0-9f1a-8d45dc1c3456",
+    "name": "API Tests",
+    "description": "Collection demonstrating API testing capabilities for technical interview",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "1. GET Users",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "// Basic response validation",
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "// Content type validation",
+              "pm.test(\"Content-Type is present\", function () {",
+              "    pm.response.to.have.header(\"Content-Type\");",
+              "});",
+              "",
+              "// Response time validation",
+              "pm.test(\"Response time is acceptable\", function () {",
+              "    pm.expect(pm.response.responseTime).to.be.below(1000);",
+              "});",
+              "",
+              "// Response structure validation",
+              "pm.test(\"Response is an array\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData).to.be.an('array');",
+              "});",
+              "",
+              "// Data validation",
+              "pm.test(\"Users have required fields\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData[0]).to.have.property('id');",
+              "    pm.expect(jsonData[0]).to.have.property('name');",
+              "    pm.expect(jsonData[0]).to.have.property('email');",
+              "});",
+              "",
+              "// Set a variable for later use",
+              "if (pm.response.json().length > 0) {",
+              "    pm.environment.set(\"userId\", pm.response.json()[0].id);",
+              "    console.log(\"Set userId variable to: \" + pm.environment.get(\"userId\"));",
+              "}"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "https://jsonplaceholder.typicode.com/users",
+          "protocol": "https",
+          "host": ["jsonplaceholder", "typicode", "com"],
+          "path": ["users"]
+        },
+        "description": "Get a list of all users from the JSONPlaceholder API"
+      },
+      "response": []
+    },
+    {
+      "name": "2. GET Single User",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "// Status verification",
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "// Schema validation",
+              "pm.test(\"User schema is valid\", function () {",
+              "    const schema = {",
+              "        type: \"object\",",
+              "        required: [\"id\", \"name\", \"email\", \"address\", \"phone\", \"website\", \"company\"],",
+              "        properties: {",
+              "            id: { type: \"number\" },",
+              "            name: { type: \"string\" },",
+              "            email: { type: \"string\" },",
+              "            address: {",
+              "                type: \"object\",",
+              "                required: [\"street\", \"suite\", \"city\", \"zipcode\", \"geo\"],",
+              "                properties: {",
+              "                    street: { type: \"string\" },",
+              "                    suite: { type: \"string\" },",
+              "                    city: { type: \"string\" },",
+              "                    zipcode: { type: \"string\" },",
+              "                    geo: {",
+              "                        type: \"object\",",
+              "                        required: [\"lat\", \"lng\"],",
+              "                        properties: {",
+              "                            lat: { type: \"string\" },",
+              "                            lng: { type: \"string\" }",
+              "                        }",
+              "                    }",
+              "                }",
+              "            }",
+              "        }",
+              "    };",
+              "    ",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(tv4.validate(jsonData, schema)).to.be.true;",
+              "});",
+              "",
+              "// Business logic test",
+              "pm.test(\"Email format is valid\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData.email).to.match(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$/);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "https://jsonplaceholder.typicode.com/users/{{userId}}",
+          "protocol": "https",
+          "host": ["jsonplaceholder", "typicode", "com"],
+          "path": ["users", "{{userId}}"]
+        },
+        "description": "Get a single user using the userId variable set from the previous request"
+      },
+      "response": []
+    },
+    {
+      "name": "3. POST Create Post",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "// Generate dynamic data for the request body",
+              "pm.environment.set(\"title\", \"New Post \" + Date.now());",
+              "pm.environment.set(\"body\", \"This is a dynamically generated body for testing purposes created on \" + new Date().toISOString());"
+            ],
+            "type": "text/javascript"
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "// Validate response status",
+              "pm.test(\"Status code is 201\", function () {",
+              "    pm.response.to.have.status(201);",
+              "});",
+              "",
+              "// Validate response contains the data we sent",
+              "pm.test(\"Response contains correct data\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData.title).to.eql(pm.environment.get(\"title\"));",
+              "    pm.expect(jsonData.body).to.eql(pm.environment.get(\"body\"));",
+              "    pm.expect(jsonData.userId).to.eql(Number(pm.environment.get(\"userId\")));",
+              "});",
+              "",
+              "// Validate response has an ID (means resource was created)",
+              "pm.test(\"Response has an ID\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData).to.have.property('id');",
+              "    pm.environment.set(\"postId\", jsonData.id);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"{{title}}\",\n  \"body\": \"{{body}}\",\n  \"userId\": {{userId}}\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "https://jsonplaceholder.typicode.com/posts",
+          "protocol": "https",
+          "host": ["jsonplaceholder", "typicode", "com"],
+          "path": ["posts"]
+        },
+        "description": "Create a new post using dynamic data generated in pre-request script"
+      },
+      "response": []
+    },
+    {
+      "name": "4. Debugging - 404 Request",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "// Validate the 404 status",
+              "pm.test(\"Should return 404\", function () {",
+              "    pm.response.to.have.status(404);",
+              "});",
+              "",
+              "// Debug helper",
+              "console.log(\"Response body:\", pm.response.text());",
+              "console.log(\"Response headers:\", pm.response.headers.all());",
+              "console.log(\"Response time:\", pm.response.responseTime + \"ms\");",
+              "",
+              "// Document debugging steps",
+              "pm.test(\"Debugging Steps\", function () {",
+              "    pm.expect(true).to.be.true; // Always passes",
+              "    console.log(\"Debugging Steps:\");",
+              "    console.log(\"1. Verified URL is incorrect - endpoint doesn't exist\");",
+              "    console.log(\"2. Checked response status - confirmed 404\");",
+              "    console.log(\"3. Examined response body for error details\");",
+              "    console.log(\"4. Resolution: Use a valid endpoint path\");",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "https://jsonplaceholder.typicode.com/nonexistentendpoint",
+          "protocol": "https",
+          "host": ["jsonplaceholder", "typicode", "com"],
+          "path": ["nonexistentendpoint"]
+        },
+        "description": "A deliberately failing request to demonstrate debugging techniques"
+      },
+      "response": []
+    },
+    {
+      "name": "5. GitHub Rate Limit Handling",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "// Set up rate limit handling",
+              "pm.variables.set(\"maxRetries\", 3);",
+              "pm.variables.set(\"currentRetry\", 0);",
+              "pm.variables.set(\"retryDelay\", 1000); // 1 second",
+              "",
+              "// Check if we're in a retry loop",
+              "if (!pm.variables.get(\"isRetrying\")) {",
+              "    console.log(\"Initial request - not in retry mode\");",
+              "    pm.variables.set(\"isRetrying\", false);",
+              "}"
+            ],
+            "type": "text/javascript"
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "// Capture current rate limit info",
+              "console.log(\"Rate limit remaining:\", pm.response.headers.get(\"X-RateLimit-Remaining\"));",
+              "console.log(\"Rate limit reset at:\", new Date(parseInt(pm.response.headers.get(\"X-RateLimit-Reset\")) * 1000).toLocaleString());",
+              "",
+              "// Handle potential rate limiting",
+              "if (pm.response.code === 429) { // Too Many Requests",
+              "    let currentRetry = parseInt(pm.variables.get(\"currentRetry\"));",
+              "    let maxRetries = parseInt(pm.variables.get(\"maxRetries\"));",
+              "    ",
+              "    if (currentRetry < maxRetries) {",
+              "        // Increment retry counter",
+              "        currentRetry++;",
+              "        pm.variables.set(\"currentRetry\", currentRetry);",
+              "        ",
+              "        // Set flag to indicate we're retrying",
+              "        pm.variables.set(\"isRetrying\", true);",
+              "        ",
+              "        // Calculate backoff time (exponential backoff)",
+              "        let delay = parseInt(pm.variables.get(\"retryDelay\")) * Math.pow(2, currentRetry - 1);",
+              "        console.log(`Rate limited. Retrying in ${delay}ms (Attempt ${currentRetry} of ${maxRetries})`);",
+              "        ",
+              "        // Use setTimeout to retry after delay",
+              "        setTimeout(function() {",
+              "            // Retry the same request",
+              "            pm.sendRequest(pm.request, function (err, res) {",
+              "                if (err) {",
+              "                    console.error(\"Retry failed:\", err);",
+              "                } else {",
+              "                    console.log(\"Retry successful:\", res.code);",
+              "                    // Process the successful retry response here",
+              "                }",
+              "            });",
+              "        }, delay);",
+              "    } else {",
+              "        console.log(\"Maximum retries reached. Giving up.\");",
+              "        pm.variables.set(\"isRetrying\", false);",
+              "        pm.variables.set(\"currentRetry\", 0);",
+              "    }",
+              "} else {",
+              "    // No rate limiting, reset retry counter",
+              "    pm.variables.set(\"isRetrying\", false);",
+              "    pm.variables.set(\"currentRetry\", 0);",
+              "    ",
+              "    // Normal test execution",
+              "    pm.test(\"Status code is 200\", function () {",
+              "        pm.response.to.have.status(200);",
+              "    });",
+              "    ",
+              "    pm.test(\"Rate limit information is present\", function () {",
+              "        var jsonData = pm.response.json();",
+              "        pm.expect(jsonData).to.have.property('resources');",
+              "        pm.expect(jsonData.resources).to.have.property('core');",
+              "    });",
+              "}"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "https://api.github.com/rate_limit",
+          "protocol": "https",
+          "host": ["api", "github", "com"],
+          "path": ["rate_limit"]
+        },
+        "description": "Request to demonstrate handling of rate limiting with automatic retries and exponential backoff"
+      },
+      "response": []
+    },
+    {
+      "name": "6. OAuth 2.0 - GitHub User Info",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "// Validate successful authentication",
+              "pm.test(\"Status code is 200 (authenticated)\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "// Validate user info is returned",
+              "pm.test(\"User data contains expected fields\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData).to.have.property('login');",
+              "    pm.expect(jsonData).to.have.property('id');",
+              "    pm.expect(jsonData).to.have.property('avatar_url');",
+              "});",
+              "",
+              "// Document OAuth setup",
+              "console.log(\"OAuth 2.0 Configuration Steps:\");",
+              "console.log(\"1. Created GitHub OAuth App\");",
+              "console.log(\"2. Configured callback URL to Postman's OAuth handler\");",
+              "console.log(\"3. Added Client ID and Secret\");",
+              "console.log(\"4. Requested 'user' scope\");",
+              "console.log(\"5. Initiated auth flow and acquired token\");"
+            ],
+            "type": "text/javascript"
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "// Debug authentication token",
+              "console.log('Using GitHub token: ' + pm.environment.get('github_access_token').substring(0, 4) + '...');",
+              "console.log('Token length: ' + pm.environment.get('github_access_token').length);",
+              "",
+              "// Add custom authorization header",
+              "pm.request.headers.upsert({",
+              "    key: 'Authorization',",
+              "    value: 'token ' + pm.environment.get('github_access_token')",
+              "});",
+              "",
+              "// Add a custom User-Agent header which can help with some API issues",
+              "pm.request.headers.upsert({",
+              "    key: 'User-Agent',",
+              "    value: 'PostmanRuntime'",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "noauth"
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "https://api.github.com/user",
+          "protocol": "https",
+          "host": ["api", "github", "com"],
+          "path": ["user"]
+        },
+        "description": "Get authenticated user information from GitHub API using a personal access token"
+      },
+      "response": []
+    },
+    {
+      "name": "7. Mock Server Example - Users",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "// Verify mock response",
+              "pm.test(\"Mock server returns expected data\", function () {",
+              "    pm.response.to.have.status(200);",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData).to.be.an('array');",
+              "    pm.expect(jsonData[0].name).to.eql(\"Mock User 1\");",
+              "});",
+              "",
+              "// Document mock server benefits",
+              "console.log(\"Mock Server Benefits:\");",
+              "console.log(\"1. Development without depending on backend readiness\");",
+              "console.log(\"2. Testing error scenarios and edge cases\");",
+              "console.log(\"3. Offline development capability\");",
+              "console.log(\"4. Consistent testing environment\");"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{mock_server_url}}/users",
+          "host": ["{{mock_server_url}}"],
+          "path": ["users"]
+        },
+        "description": "Example to demonstrate using a Postman mock server"
+      },
+      "response": [
+        {
+          "name": "Users Mock Response",
+          "originalRequest": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{mock_server_url}}/users",
+              "host": ["{{mock_server_url}}"],
+              "path": ["users"]
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": "json",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "cookie": [],
+          "body": "[\n  {\n    \"id\": 1,\n    \"name\": \"Mock User 1\",\n    \"email\": \"user1@example.com\"\n  },\n  {\n    \"id\": 2,\n    \"name\": \"Mock User 2\",\n    \"email\": \"user2@example.com\"\n  }\n]"
+        }
+      ]
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Collection-level variables setup",
+          "if (!pm.collectionVariables.get(\"testRunId\")) {",
+          "    pm.collectionVariables.set(\"testRunId\", Date.now().toString());",
+          "    console.log(\"Starting test run: \" + pm.collectionVariables.get(\"testRunId\"));",
+          "}"
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Collection-level test reporting",
+          "console.log(\"Request completed: \" + pm.info.requestName);",
+          "",
+          "// Track run statistics",
+          "if (!pm.collectionVariables.get(\"testsRun\")) {",
+          "    pm.collectionVariables.set(\"testsRun\", \"0\");",
+          "    pm.collectionVariables.set(\"testsPassed\", \"0\");",
+          "    pm.collectionVariables.set(\"testsFailed\", \"0\");",
+          "}",
+          "",
+          "let testResults = pm.test?.testResults || [];",
+          "let testsRun = parseInt(pm.collectionVariables.get(\"testsRun\")) + testResults.length;",
+          "pm.collectionVariables.set(\"testsRun\", testsRun.toString());",
+          "",
+          "let testsPassed = parseInt(pm.collectionVariables.get(\"testsPassed\"));",
+          "let testsFailed = parseInt(pm.collectionVariables.get(\"testsFailed\"));",
+          "",
+          "testResults.forEach(result => {",
+          "    if (result.passed) {",
+          "        testsPassed++;",
+          "    } else {",
+          "        testsFailed++;",
+          "    }",
+          "});",
+          "",
+          "pm.collectionVariables.set(\"testsPassed\", testsPassed.toString());",
+          "pm.collectionVariables.set(\"testsFailed\", testsFailed.toString());",
+          "",
+          "// If this is the last request in the collection, generate a report",
+          "if (pm.info.requestName === \"7. Mock Server Example - Users\") {",
+          "    console.log(\"Test Run Summary:\");",
+          "    console.log(\"Run ID: \" + pm.collectionVariables.get(\"testRunId\"));",
+          "    console.log(\"Total Tests: \" + pm.collectionVariables.get(\"testsRun\"));",
+          "    console.log(\"Tests Passed: \" + pm.collectionVariables.get(\"testsPassed\"));",
+          "    console.log(\"Tests Failed: \" + pm.collectionVariables.get(\"testsFailed\"));",
+          "    console.log(\"Success Rate: \" + (testsPassed / testsRun * 100).toFixed(2) + \"%\");",
+          "}"
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "userId",
+      "value": "1"
+    },
+    {
+      "key": "title",
+      "value": ""
+    },
+    {
+      "key": "body",
+      "value": ""
+    },
+    {
+      "key": "postId",
+      "value": ""
+    },
+    {
+      "key": "github_client_id",
+      "value": "YOUR_GITHUB_CLIENT_ID"
+    },
+    {
+      "key": "github_client_secret",
+      "value": "YOUR_GITHUB_CLIENT_SECRET"
+    },
+    {
+      "key": "mock_server_url",
+      "value": "https://YOUR_MOCK_SERVER_URL.mock.pstmn.io"
+    },
+    {
+      "key": "testRunId",
+      "value": ""
+    },
+    {
+      "key": "testsRun",
+      "value": ""
+    },
+    {
+      "key": "testsPassed",
+      "value": ""
+    },
+    {
+      "key": "testsFailed",
+      "value": ""
+    },
+    {
+      "key": "github_access_token",
+      "value": "YOUR_GITHUB_ACCESS_TOKEN"
+    }
+  ]
+}
