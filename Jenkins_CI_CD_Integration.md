@@ -24,7 +24,7 @@ This guide explains how to integrate the Postman collection with Jenkins for aut
 
 - Go to "Manage Jenkins" > "Global Tool Configuration"
 - Scroll to the NodeJS section and click "Add NodeJS"
-- Name it (e.g., "Node 16")
+- Provide Name
 - Select the installation option (usually "Install from nodejs.org")
 - Select the version (recommended: LTS version)
 - Save the configuration
@@ -61,7 +61,7 @@ pipeline {
     agent any
 
     tools {
-        nodejs 'Node 16'
+        nodejs 'Node <version>'
     }
 
     stages {

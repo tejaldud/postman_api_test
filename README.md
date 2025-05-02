@@ -102,4 +102,3 @@ This repository contains a Postman collection that addresses the requirements fo
 
 - The collection uses public APIs (JSONPlaceholder and GitHub)
 - For GitHub API authentication,initially attempted OAuth 2.0 but documented the challenges and ultimately used a simpler Personal Access Token approach for demonstration
-- This collection is designed to be shared publicly to demonstrate Postman skills
